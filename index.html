@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: transparent;
+    color: #393633;
+    font-family: Georgia, "Times New Roman", serif;
+  }
+
+  .widget {
+    width: 100%;
+    min-height: 150px;
+    padding: 28px 38px;
+    border: 1px solid rgba(57, 54, 51, 0.16);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .left, .right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .right {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  .label {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    color: #8a8580;
+  }
+
+  .time {
+    font-size: clamp(34px, 5vw, 58px);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .week {
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .range {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: #8a8580;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="widget">
+  <div class="left">
+    <div class="label" id="date"></div>
+    <div class="time" id="time"></div>
+  </div>
+
+  <div class="right">
+    <div class="week" id="week"></div>
+    <div class="range" id="range"></div>
+  </div>
+</div>
+
+<script>
+const semesterStart = new Date(2026, 7, 10); 
+// August 10, 2026 = NUS Week 1
+
+function updateWidget() {
+  const now = new Date();
+
+  // DATE
+  document.getElementById("date").textContent =
+    now.toLocaleDateString("en-GB", {
+      weekday: "long",
+      month: "long",
+      day: "numeric"
+    }).toUpperCase();
+
+  // TIME
+  document.getElementById("time").textContent =
+    now.toLocaleTimeString("en-GB", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true
+    }).toUpperCase();
+
+  // FIND CURRENT MONDAY
+  const currentMonday = new Date(now);
+  const day = currentMonday.getDay();
+  const diffToMonday = day === 0 ? -6 : 1 - day;
+
+  currentMonday.setDate(currentMonday.getDate() + diffToMonday);
+  currentMonday.setHours(0, 0, 0, 0);
+
+  // WEEK NUMBER
+  const millisecondsPerWeek = 7 * 24 * 60 * 60 * 1000;
+  const weekNumber =
+    Math.floor((currentMonday - semesterStart) / millisecondsPerWeek) + 1;
+
+  document.getElementById("week").textContent =
+    "WEEK " + String(weekNumber).padStart(2, "0");
+
+  // WEEK DATE RANGE
+  const weekEnd = new Date(currentMonday);
+  weekEnd.setDate(currentMonday.getDate() + 6);
+
+  const startDay = currentMonday.getDate();
+  const endDay = weekEnd.getDate();
+
+  const startMonth = currentMonday.toLocaleDateString("en-GB", {
+    month: "short"
+  }).toUpperCase();
+
+  const endMonth = weekEnd.toLocaleDateString("en-GB", {
+    month: "short"
+  }).toUpperCase();
+
+  let range;
+
+  if (startMonth === endMonth) {
+    range = `${startDay}–${endDay} ${startMonth}`;
+  } else {
+    range = `${startDay} ${startMonth}–${endDay} ${endMonth}`;
+  }
+
+  document.getElementById("range").textContent = range;
+}
+
+updateWidget();
+setInterval(updateWidget, 1000);
+</script>
+
+</body>
+</html>
